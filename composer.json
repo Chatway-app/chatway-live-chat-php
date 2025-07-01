@@ -1,5 +1,5 @@
 {
-    "name": "chatway/chatway-app",
+    "name": "chatway-live-chat/chatway-live-chat-php",
     "description": "Embed Chatway chat widget in any PHP app",
     "license": "MIT",
     "autoload": {
@@ -9,8 +9,8 @@
     },
     "authors": [
         {
-            "name": "Nibir Ahmed",
-            "email": "nibir@premio.io"
+            "name": "Chatway Live Chat",
+            "email": "contact@poptin.com"
         }
     ],
     "minimum-stability": "stable",
