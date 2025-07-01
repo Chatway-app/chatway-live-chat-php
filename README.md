@@ -73,3 +73,10 @@ echo \Chatway\Chatway::visitorVerification(
     ['Subscription Plan' => 'Premium']
 );
 ```
+
+## For Laravel
+For laravel you can use blade syntax like
+
+```php
+{!! \Chatway\Chatway::script('your-widget-id') !!}
+```
