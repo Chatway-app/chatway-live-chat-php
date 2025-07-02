@@ -2,6 +2,8 @@
 
 namespace Chatway;
 
+use InvalidArgumentException;
+
 class Chatway
 {
     protected string $userIdentifier;
@@ -15,7 +17,7 @@ class Chatway
     protected array $customFields = [];
 
     protected ?string $userId = null;
-    
+
     protected ?string $email = null;
 
     public static function make(string $userIdentifier, ?string $hmacSecret = null, string $hmacBasedOn = 'id'): self
@@ -31,10 +33,22 @@ class Chatway
     public function setTag(string|array $key, ?string $color = null): self
     {
         if (is_array($key)) {
+            if (!self::isAssoc($key)) {
+                throw new InvalidArgumentException('Tags must be an associative array: name => color.');
+            }
+
             foreach ($key as $name => $value) {
+                if (!is_string($name) || !is_string($value)) {
+                    throw new InvalidArgumentException('Both tag name and color must be strings.');
+                }
+
                 $this->tags[] = ['name' => $name, 'color' => $value];
             }
         } else {
+            if (!is_string($color)) {
+                throw new InvalidArgumentException('Color must be a string.');
+            }
+
             $this->tags[] = ['name' => $key, 'color' => $color];
         }
 
@@ -44,10 +58,22 @@ class Chatway
     public function setCustomField(string|array $key, ?string $value = null): self
     {
         if (is_array($key)) {
+            if (!self::isAssoc($key)) {
+                throw new InvalidArgumentException('Custom fields must be an associative array: name => value.');
+            }
+
             foreach ($key as $name => $val) {
+                if (!is_string($name) || !is_string($val)) {
+                    throw new InvalidArgumentException('Both custom field name and value must be strings.');
+                }
+
                 $this->customFields[] = ['name' => $name, 'value' => $val];
             }
         } else {
+            if (!is_string($value)) {
+                throw new InvalidArgumentException('Custom field value must be a string.');
+            }
+
             $this->customFields[] = ['name' => $key, 'value' => $value];
         }
 
@@ -60,6 +86,11 @@ class Chatway
         $this->email = $email;
 
         return $this;
+    }
+
+    protected static function isAssoc(array $array): bool
+    {
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 
     public function getScript(): string
