@@ -1,20 +1,22 @@
-# Chatway PHP Embed SDK
+# Chatway PHP SDK
 
-A simple, framework-agnostic PHP SDK to embed the Chatway live chat widget and verify visitors. Works with any PHP-based application including Laravel, plain PHP, etc
+The **Chatway PHP SDK** is a lightweight, framework-agnostic PHP package to embed the [Chatway](https://chatway.app) live chat widget and securely verify your users (visitors) using a simple, chainable API.
 
----
-
-## ✨ Features
-
-- Embed Chatway widget with a single method.
-- Secure visitor verification
-- Add visitor tags and custom fields.
+It works with any PHP application — Laravel, WordPress, custom frameworks, or plain PHP.
 
 ---
 
-## 📦 Installation
+## Features
 
-Install via Composer:
+- Embed the Chatway widget using your project’s widget ID
+- Optionally verify visitors (users) by ID/email
+- Assign tags and custom fields
+- Clean, chainable syntax
+- Fully HTML-escaped output
+
+---
+
+## Installation
 
 ```bash
 composer require chatway-live-chat/chatway-live-chat-php
@@ -22,61 +24,114 @@ composer require chatway-live-chat/chatway-live-chat-php
 
 ---
 
-## 📘 Usage
+## Basic Usage
 
-### Chatway::script()
-
-Embed the Chatway widget using your identifier.
+Just embed the chat widget without any visitor verification:
 
 ```php
-Chatway::script(?string $userIdentifier): string
+echo Chatway\Chatway::make('your-widget-id')->getScript();
 ```
 
-**Parameters:**
+This will output the Chatway script tag.
 
-- `userIdentifier` (string|null): The unique widget ID from Chatway.
+---
 
-**Example:**
+## Visitor Verification
+
+To securely verify logged-in users (optional), pass:
+
+- The **user ID**
+- The **email address**
+- A **secret key** provided from your Chatway dashboard
+- Whether the signature should be based on `id` or `email`
+
+All four fields are required to enable visitor verification.
+
+Example:
 
 ```php
-echo \Chatway\Chatway::script('your-widget-id');
+echo Chatway\Chatway::make('your-widget-id', 'your-secret-key', 'id')
+    ->withVisitor('123', 'user@example.com')
+    ->getScript();
+```
+
+This will output a verified `window.chatwaySettings` block with a hash and load the widget script.
+
+---
+
+## Tags
+
+You can assign tags to the visitor. Each tag has a name and a color.
+
+### Single Tag
+
+```php
+->setTag('VIP', '#FFD700')
+```
+
+### Multiple Tags
+
+```php
+->setTag([
+    'VIP' => '#FFD700',
+    'Supporter' => '#00FF00'
+])
 ```
 
 ---
 
-### Chatway::visitorVerification
+## Custom Fields
 
-Generate a script to securely identify and verify a visitor.
+Attach custom fields to the visitor session.
 
-```php
-Chatway::visitorVerification(string $userId, string $email, string $hmacSecret, string $hmacBasedOn = 'id', array $tags = [], array $customFields = []): string
-```
-
-**Parameters:**
-
-- `userId` (string): Unique user identifier.
-- `email` (string): Visitor’s email address.
-- `hmacSecret` (string): Your security key from Chatway.
-- `hmacBasedOn` (string): Identifier based on `'id'` or `'email'`. Default is `'id'`.
-- `tags` (array): (Optional) Array of tags for the visitor.
-- `customFields` (array): (Optional) Key-value pairs of custom fields.
-
-**Example:**
+### Single Field
 
 ```php
-echo \Chatway\Chatway::visitorVerification(
-    '123',
-    'user@example.com',
-    'your-hmac-secret',
-    'id',
-    [['name' => 'VIP', 'color' => '#FFD700']],
-    ['Subscription Plan' => 'Premium']
-);
+->setCustomField('Plan', 'Premium')
 ```
 
-## For Laravel
-For laravel you can use blade syntax like
+### Multiple Fields
 
 ```php
-{!! \Chatway\Chatway::script('your-widget-id') !!}
+->setCustomField([
+    'Subscription' => 'Gold',
+    'Status' => 'Active'
+])
 ```
+
+---
+
+## Full Example
+
+```php
+echo Chatway\Chatway::make('your-widget-id', 'your-secret-key', 'email')
+    ->withVisitor('123', 'user@example.com')
+    ->setTag('VIP', '#FFD700')
+    ->setTag(['Supporter' => '#00FF00'])
+    ->setCustomField('Plan', 'Pro')
+    ->setCustomField([
+        'Country' => 'USA',
+        'Language' => 'English'
+    ])
+    ->getScript();
+```
+
+---
+
+## Notes
+
+- If visitor verification is enabled, all of these are required:
+  - `make(widgetId, secretKey, basedOn)`
+  - `withVisitor(userId, email)`
+- `basedOn` must be either `'id'` or `'email'`
+- All tag and custom field names and values must be strings
+- Tags must be an associative array of name => color
+- Custom fields must be an associative array of name => value
+
+Invalid inputs will throw `InvalidArgumentException`.
+
+---
+
+## License
+
+MIT © [Chatway](https://chatway.app)
