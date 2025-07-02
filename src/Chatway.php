@@ -2,40 +2,107 @@
 
 namespace Chatway;
 
-class Chatway {
-    public static function script( ?string $userIdentifier ): string 
+class Chatway
+{
+    protected string $userIdentifier;
+
+    protected ?string $hmacSecret = null;
+
+    protected string $hmacBasedOn = 'id';
+
+    protected array $tags = [];
+
+    protected array $customFields = [];
+
+    protected ?string $userId = null;
+    
+    protected ?string $email = null;
+
+    public static function make(string $userIdentifier, ?string $hmacSecret = null, string $hmacBasedOn = 'id'): self
     {
-        return sprintf(
-            '<script id="chatway" async="true" src="https://cdn.chatway.app/widget.js?id=%s"></script>',
-            htmlspecialchars( $userIdentifier, ENT_QUOTES, 'UTF-8' )
-        );
+        $instance = new self();
+        $instance->userIdentifier = $userIdentifier;
+        $instance->hmacSecret = $hmacSecret;
+        $instance->hmacBasedOn = $hmacBasedOn;
+
+        return $instance;
     }
 
-    public static function visitorVerification( string $userId, string $email, string $hmacSecret, string $hmacBasedOn = 'id', array $tags = [], array $customFields = [] ): string 
+    public function setTag(string|array $key, ?string $color = null): self
     {
-        $safeId = htmlspecialchars( $userId, ENT_QUOTES, 'UTF-8' );
-        $safeEmail = htmlspecialchars( $email, ENT_QUOTES, 'UTF-8' );
+        if (is_array($key)) {
+            foreach ($key as $name => $value) {
+                $this->tags[] = ['name' => $name, 'color' => $value];
+            }
+        } else {
+            $this->tags[] = ['name' => $key, 'color' => $color];
+        }
 
-        $hmacBase = $hmacBasedOn === 'email' ? $email : $userId;
-        $hmac = hash_hmac( 'sha256', $hmacBase, $hmacSecret );
+        return $this;
+    }
 
-        $tagsJson = json_encode( $tags );
-        $customFieldsJson = json_encode( $customFields );
+    public function setCustomField(string|array $key, ?string $value = null): self
+    {
+        if (is_array($key)) {
+            foreach ($key as $name => $val) {
+                $this->customFields[] = ['name' => $name, 'value' => $val];
+            }
+        } else {
+            $this->customFields[] = ['name' => $key, 'value' => $value];
+        }
 
-        return <<<SCRIPT
-            <script>
-                window.chatwaySettings = {
-                visitor: {
-                        data: {
-                            id: "{$safeId}",
-                            email: "{$safeEmail}"
+        return $this;
+    }
+
+    public function withVisitor(string $userId, string $email): self
+    {
+        $this->userId = $userId;
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getScript(): string
+    {
+        $script = '';
+
+        $shouldVerify =
+            $this->hmacSecret &&
+            $this->userId !== null &&
+            $this->email !== null &&
+            in_array($this->hmacBasedOn, ['id', 'email'], true);
+
+        if ($shouldVerify) {
+            $safeId = htmlspecialchars($this->userId, ENT_QUOTES, 'UTF-8');
+            $safeEmail = htmlspecialchars($this->email, ENT_QUOTES, 'UTF-8');
+            $hmacBase = $this->hmacBasedOn === 'email' ? $this->email : $this->userId;
+            $hmac = hash_hmac('sha256', $hmacBase, $this->hmacSecret);
+
+            $tagsJson = json_encode($this->tags);
+            $customFieldsJson = json_encode($this->customFields);
+
+            $script .= <<<SCRIPT
+                <script>
+                    window.chatwaySettings = {
+                        visitor: {
+                            data: {
+                                id: "{$safeId}",
+                                email: "{$safeEmail}"
+                            },
+                            hmac: "{$hmac}"
                         },
-                        hmac: "{$hmac}"
-                    },
-                    tags: {$tagsJson},
-                    customFields: {$customFieldsJson}
-                };
-            </script>
+                        tags: {$tagsJson},
+                        customFields: {$customFieldsJson}
+                    };
+                </script>
+            SCRIPT;
+        }
+
+        $userIdentifier = htmlspecialchars($this->userIdentifier, ENT_QUOTES, 'UTF-8');
+        $script .= <<<SCRIPT
+            <script id="chatway" async="true" src="https://cdn.chatway.app/widget.js?id={$userIdentifier}"></script>
         SCRIPT;
+
+        return $script;
     }
 }
