@@ -1,6 +1,4 @@
 
-![chatway-pack](https://github.com/user-attachments/assets/23333c76-e427-487d-8341-d8579fe537de)
-
 # Chatway PHP SDK
 
 The **Chatway live chat PHP SDK** is a lightweight, framework-agnostic PHP library that allows you to easily embed the [Chatway](https://chatway.app/?utm_source=packagist) live chat customer support widget on your website and securely identify your visitors using a simple, chainable API.
@@ -8,6 +6,8 @@ The **Chatway live chat PHP SDK** is a lightweight, framework-agnostic PHP libra
 Chatway is a powerful live chat solution for websites, offering features such as live chat customer support, real-time visitor tracking, customizable widgets, canned responses, FAQs, multilingual support, private notes, visitor segmentation, analytics, and more. Chatway is available as a web app, as well as native iOS and Android apps.
 
 This SDK works with any PHP application, including Laravel, WordPress, custom frameworks, or plain PHP projects.
+
+![chatway-pack](https://github.com/user-attachments/assets/23333c76-e427-487d-8341-d8579fe537de)
 
 ---
 
