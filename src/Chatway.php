@@ -30,7 +30,7 @@ class Chatway
         return $instance;
     }
 
-    public function setTag(string|array $key, ?string $color = null): self
+    public function setTags(string|array $key, ?string $color = null): self
     {
         if (is_array($key)) {
             if (!self::isAssoc($key)) {
@@ -55,7 +55,7 @@ class Chatway
         return $this;
     }
 
-    public function setCustomField(string|array $key, ?string $value = null): self
+    public function setCustomFields(string|array $key, ?string $value = null): self
     {
         if (is_array($key)) {
             if (!self::isAssoc($key)) {
