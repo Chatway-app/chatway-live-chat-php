@@ -74,13 +74,13 @@ You can assign tags to visitors, each with a name and color.
 **Single Tag:**
 
 ```php
-->setTag('VIP', '#FFD700')
+->setTags('VIP', '#FFD700')
 ```
 
 **Multiple Tags:**
 
 ```php
-->setTag([
+->setTags([
     'VIP' => '#FFD700',
     'Supporter' => '#00FF00'
 ]);
@@ -95,13 +95,13 @@ You can attach custom fields to enrich visitor session data.
 **Single Field:**
 
 ```php
-->setCustomField('Plan', 'Premium')
+->setCustomFields('Plan', 'Premium')
 ```
 
 **Multiple Fields:**
 
 ```php
-->setCustomField([
+->setCustomFields([
     'Subscription' => 'Gold',
     'Status' => 'Active'
 ]);
@@ -114,10 +114,10 @@ You can attach custom fields to enrich visitor session data.
 ```php
 echo Chatway\Chatway::make('your-widget-id', 'your-secret-key', 'email')
     ->withVisitor('123', 'user@example.com')
-    ->setTag('VIP', '#FFD700')
-    ->setTag(['Supporter' => '#00FF00'])
-    ->setCustomField('Plan', 'Pro')
-    ->setCustomField([
+    ->setTags('VIP', '#FFD700')
+    ->setTags(['Supporter' => '#00FF00'])
+    ->setCustomFields('Plan', 'Pro')
+    ->setCustomFields([
         'Country' => 'USA',
         'Language' => 'English'
     ])
