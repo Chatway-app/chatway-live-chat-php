@@ -115,7 +115,7 @@ class Chatway
      */
     public function withVisitor($userId, $email)
     {
-        $this->userId = is_string($userId) ? $userId : null;
+        $this->userId = is_string($userId) || is_int($userId) || is_float($userId) ? $userId : null;
         $this->email = is_string($email) ? $email : null;
 
         return $this;
