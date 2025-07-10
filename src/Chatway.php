@@ -6,57 +6,34 @@ use InvalidArgumentException;
 
 class Chatway
 {
-    /** @var string */
-    protected $userIdentifier = null;
+    protected string $userIdentifier;
 
-    /** @var string|null */
-    protected $hmacSecret = null;
+    protected ?string $hmacSecret = null;
 
-    /** @var string */
-    protected $hmacBasedOn = self::HMAC_BASE_ON_OPTIONS['id'];
+    protected string $hmacBasedOn = 'id';
 
-    /** @var array */
-    protected $tags = [];
+    protected array $tags = [];
 
-    /** @var array */
-    protected $customFields = [];
+    protected array $customFields = [];
 
-    /** @var string|null */
-    protected $userId = null;
+    protected ?string $userId = null;
 
-    /** @var string|null */
-    protected $email = null;
+    protected ?string $email = null;
 
-    const HMAC_BASE_ON_OPTIONS = [
-        'id' => 'id',
-        'email' => 'email',
-    ];
-
-    /**
-     * @param string $userIdentifier
-     * @param string|null $hmacSecret
-     * @param string $hmacBasedOn
-     * @return self
-     */
-    public static function make($userIdentifier, $hmacSecret = null, $hmacBasedOn = self::HMAC_BASE_ON_OPTIONS['id'])
+    public static function make(string $userIdentifier, ?string $hmacSecret = null, string $hmacBasedOn = 'id'): self
     {
         $instance = new self();
-        $instance->userIdentifier = is_string($userIdentifier) ? $userIdentifier : null;
-        $instance->hmacSecret = is_string($hmacSecret) ? $hmacSecret : null;
-        $instance->hmacBasedOn = is_string($hmacBasedOn) && in_array($hmacBasedOn, array_values(self::HMAC_BASE_ON_OPTIONS), true) ? $hmacBasedOn : self::HMAC_BASE_ON_OPTIONS['id'];
+        $instance->userIdentifier = $userIdentifier;
+        $instance->hmacSecret = $hmacSecret;
+        $instance->hmacBasedOn = $hmacBasedOn;
 
         return $instance;
     }
 
-    /**
-     * @param string|array $key
-     * @param string|null $color
-     * @return self
-     */
-    public function setTags($key, $color = null)
+    public function setTags(string|array $key, ?string $color = null): self
     {
         if (is_array($key)) {
-            if (!$this->isAssoc($key)) {
+            if (!self::isAssoc($key)) {
                 throw new InvalidArgumentException('Tags must be an associative array: name => color.');
             }
 
@@ -68,8 +45,8 @@ class Chatway
                 $this->tags[] = ['name' => $name, 'color' => $value];
             }
         } else {
-            if (!is_string($key) || !is_string($color)) {
-                throw new InvalidArgumentException('Tag name and color must be strings.');
+            if (!is_string($color)) {
+                throw new InvalidArgumentException('Color must be a string.');
             }
 
             $this->tags[] = ['name' => $key, 'color' => $color];
@@ -78,15 +55,10 @@ class Chatway
         return $this;
     }
 
-    /**
-     * @param string|array $key
-     * @param string|null $value
-     * @return self
-     */
-    public function setCustomFields($key, $value = null)
+    public function setCustomFields(string|array $key, ?string $value = null): self
     {
         if (is_array($key)) {
-            if (!$this->isAssoc($key)) {
+            if (!self::isAssoc($key)) {
                 throw new InvalidArgumentException('Custom fields must be an associative array: name => value.');
             }
 
@@ -98,8 +70,8 @@ class Chatway
                 $this->customFields[] = ['name' => $name, 'value' => $val];
             }
         } else {
-            if (!is_string($key) || !is_string($value)) {
-                throw new InvalidArgumentException('Custom field name and value must be strings.');
+            if (!is_string($value)) {
+                throw new InvalidArgumentException('Custom field value must be a string.');
             }
 
             $this->customFields[] = ['name' => $key, 'value' => $value];
@@ -108,39 +80,28 @@ class Chatway
         return $this;
     }
 
-    /**
-     * @param string $userId
-     * @param string $email
-     * @return self
-     */
-    public function withVisitor($userId, $email)
+    public function withVisitor(string $userId, string $email): self
     {
-        $this->userId = is_string($userId) ? $userId : null;
-        $this->email = is_string($email) ? $email : null;
+        $this->userId = $userId;
+        $this->email = $email;
 
         return $this;
     }
 
-    /**
-     * @param array $array
-     * @return bool
-     */
-    protected function isAssoc(array $array)
+    protected static function isAssoc(array $array): bool
     {
         return array_keys($array) !== range(0, count($array) - 1);
     }
 
-    /**
-     * @return string
-     */
-    public function getScript()
+    public function getScript(): string
     {
         $script = '';
 
-        $shouldVerify = $this->hmacSecret &&
+        $shouldVerify =
+            $this->hmacSecret &&
             $this->userId !== null &&
             $this->email !== null &&
-            in_array($this->hmacBasedOn, array_values(self::HMAC_BASE_ON_OPTIONS), true);
+            in_array($this->hmacBasedOn, ['id', 'email'], true);
 
         if ($shouldVerify) {
             $safeId = htmlspecialchars($this->userId, ENT_QUOTES, 'UTF-8');
